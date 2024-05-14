@@ -1,4 +1,4 @@
-# Ludi CaseStudy for an Internship
+# Ludi CaseStudy
 
 Running the Application
 
