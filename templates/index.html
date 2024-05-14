@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ludi Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="{{ url_for('static', filename='images/ludi_logo.png') }}" alt="Ludi Logo" class="logo">
+            <h1>Ludi Dashboard</h1>
+        </header>
+
+        <section class="table-section">
+            <h2>Total Users Per Company</h2>
+            <table id="companyUserTable">
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Total Users</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <section class="chart-section">
+            <h2>Daily Growth of Total Users</h2>
+            <canvas id="userGrowthChart"></canvas>
+        </section>
+    </div>
+
+    <script>
+        fetch('/api/company_user_counts')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('companyUserTable').querySelector('tbody');
+                data.forEach(company => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${company.company_name}</td><td>${company.user_count}</td>`;
+                    tableBody.appendChild(row);
+                });
+            });
+
+        fetch('/api/daily_user_growth')
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('userGrowthChart').getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(entry => entry.signup_datetime),
+                        datasets: [{
+                            label: 'Total Users',
+                            data: data.map(entry => entry.total_users),
+                            borderColor: '#1f78b4', // Blue color matching the logo
+                            borderWidth: 2,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'day'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+</body>
+</html>
